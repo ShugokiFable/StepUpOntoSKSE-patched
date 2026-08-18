@@ -105,6 +105,12 @@ jobs:
       - name: Verify DLL was produced
         shell: pwsh
         run: |
-          $dll = Get-ChildItem -Recurse -Filter *.dll build | Select-Object -First 1
+          # CMake installs the plugin to package/SKSE/Plugins, not build/.
+          $dll = Get-ChildItem -Recurse -Filter StepUpOntoSKSE.dll -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if (-not $dll) {
+            $dll = Get-ChildItem -Recurse -Filter *.dll package, build -ErrorAction SilentlyContinue |
+              Select-Object -First 1
+          }
           if (-not $dll) { throw "Build produced no DLL." }
           Write-Host "Built $($dll.FullName)"
